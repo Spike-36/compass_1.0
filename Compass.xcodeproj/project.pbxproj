@@ -24,25 +24,58 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		50536E552E73B456009E561E /* Compass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Compass.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		50536E632E73B457009E561E /* CompassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		50536E6D2E73B457009E561E /* CompassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompassUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		50536E552E73B456009E561E /* Compass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Compass.app; path = /Users/petermilligan/Dev/Compass/build/Debug/Compass.app; sourceTree = "<absolute>"; };
+		50536E632E73B457009E561E /* CompassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CompassTests.xctest; path = /Users/petermilligan/Dev/Compass/build/Debug/Compass.app/Contents/PlugIns/CompassTests.xctest; sourceTree = "<absolute>"; };
+		50536E6D2E73B457009E561E /* CompassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CompassUITests.xctest; path = "/Users/petermilligan/Dev/Compass/build/Debug/CompassUITests-Runner.app/Contents/PlugIns/CompassUITests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		50536EC32E73F60E009E561E /* Exceptions for "CompassTests" folder in "CompassTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				_CurlyQuoteAuditTests.swift,
+				CompassTests.swift,
+				DocumentIdentityTests.swift,
+				DocumentParsingTests.swift,
+			);
+			target = 50536E622E73B457009E561E /* CompassTests */;
+		};
+		50536EC42E73F638009E561E /* Exceptions for "Compass" folder in "Compass" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				") DocumentIdentity.swift",
+				AnchorChecksum.swift,
+				DebugStubs.swift,
+				Hashing.swift,
+				HTMLExporter.swift,
+				IDSpec.swift,
+				Manifest.swift,
+				ManifestUpdate.swift,
+				SentenceSplitter.swift,
+				Slug.swift,
+				UUIDv5.swift,
+				VersionIndex.swift,
+				WebKitSafeMode.swift,
+			);
+			target = 50536E542E73B456009E561E /* Compass */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		50536E572E73B456009E561E /* Compass */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				50536EC42E73F638009E561E /* Exceptions for "Compass" folder in "Compass" target */,
+			);
 			path = Compass;
 			sourceTree = "<group>";
 		};
 		50536E662E73B457009E561E /* CompassTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				50536EC32E73F60E009E561E /* Exceptions for "CompassTests" folder in "CompassTests" target */,
+			);
 			path = CompassTests;
-			sourceTree = "<group>";
-		};
-		50536E702E73B457009E561E /* CompassUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CompassUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -77,19 +110,7 @@
 			children = (
 				50536E572E73B456009E561E /* Compass */,
 				50536E662E73B457009E561E /* CompassTests */,
-				50536E702E73B457009E561E /* CompassUITests */,
-				50536E562E73B456009E561E /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		50536E562E73B456009E561E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				50536E552E73B456009E561E /* Compass.app */,
-				50536E632E73B457009E561E /* CompassTests.xctest */,
-				50536E6D2E73B457009E561E /* CompassUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -153,9 +174,6 @@
 			dependencies = (
 				50536E6F2E73B457009E561E /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				50536E702E73B457009E561E /* CompassUITests */,
-			);
 			name = CompassUITests;
 			packageProductDependencies = (
 			);
@@ -196,7 +214,7 @@
 			mainGroup = 50536E4C2E73B456009E561E;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 50536E562E73B456009E561E /* Products */;
+			productRefGroup = 50536E4C2E73B456009E561E;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (

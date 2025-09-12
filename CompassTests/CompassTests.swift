@@ -1,17 +1,11 @@
-//
-//  CompassTests.swift
-//  CompassTests
-//
-//  Created by Peter Milligan on 12/09/2025.
-//
-
-import Testing
+import XCTest
 @testable import Compass
 
-struct CompassTests {
+final class CompassTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    func testExample() throws {
+        // A dummy sanity check
+        XCTAssertEqual(2 + 2, 4)
     }
-
 }
+
