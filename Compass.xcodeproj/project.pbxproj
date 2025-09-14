@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		50536EF52E76B4A7009E561E /* import_test.py in Sources */ = {isa = PBXBuildFile; fileRef = 50536EF42E76B4A4009E561E /* import_test.py */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		50536E642E73B457009E561E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		50536E552E73B456009E561E /* Compass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Compass.app; path = /Users/petermilligan/Dev/Compass/build/Debug/Compass.app; sourceTree = "<absolute>"; };
 		50536E632E73B457009E561E /* CompassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CompassTests.xctest; path = /Users/petermilligan/Dev/Compass/build/Debug/Compass.app/Contents/PlugIns/CompassTests.xctest; sourceTree = "<absolute>"; };
 		50536E6D2E73B457009E561E /* CompassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CompassUITests.xctest; path = "/Users/petermilligan/Dev/Compass/build/Debug/CompassUITests-Runner.app/Contents/PlugIns/CompassUITests.xctest"; sourceTree = "<absolute>"; };
+		50536EF42E76B4A4009E561E /* import_test.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = import_test.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -46,12 +51,12 @@
 				") DocumentIdentity.swift",
 				AnchorChecksum.swift,
 				DebugStubs.swift,
+				DocumentParser.swift,
 				Hashing.swift,
 				HTMLExporter.swift,
 				IDSpec.swift,
 				Manifest.swift,
 				ManifestUpdate.swift,
-				SentenceSplitter.swift,
 				Slug.swift,
 				UUIDv5.swift,
 				VersionIndex.swift,
@@ -76,6 +81,11 @@
 				50536EC32E73F60E009E561E /* Exceptions for "CompassTests" folder in "CompassTests" target */,
 			);
 			path = CompassTests;
+			sourceTree = "<group>";
+		};
+		50536EE62E7556E6009E561E /* db */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = db;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -108,8 +118,10 @@
 		50536E4C2E73B456009E561E = {
 			isa = PBXGroup;
 			children = (
+				50536EE62E7556E6009E561E /* db */,
 				50536E572E73B456009E561E /* Compass */,
 				50536E662E73B457009E561E /* CompassTests */,
+				50536EF42E76B4A4009E561E /* import_test.py */,
 			);
 			sourceTree = "<group>";
 		};
@@ -130,6 +142,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				50536E572E73B456009E561E /* Compass */,
+				50536EE62E7556E6009E561E /* db */,
 			);
 			name = Compass;
 			packageProductDependencies = (
@@ -254,6 +267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50536EF52E76B4A7009E561E /* import_test.py in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

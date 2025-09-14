@@ -2,7 +2,9 @@
 //  DocxPipeline.swift
 //  Compass
 //
-//  Reads a user-selected DOCX → plain text via `textutil` → HTML with stable sentence IDs.
+//  Reads a user-selected DOCX → plain text via `textutil` → HTML with sentence spans.
+//  Writes outputs to ~/Dev/Compass/exports (real home dir, not sandbox container).
+//  Calls CapturePhase1.runSameLineCapture(...) after paragraphization (Phase 1).
 //
 
 import Foundation
@@ -24,18 +26,33 @@ enum DocxPipeline {
                                         "DOCX not found at \(input.path)"])
         }
 
-        // Temporary workspace
-        let root = fm.temporaryDirectory.appendingPathComponent("Compass-\(UUID().uuidString)")
-        let exports = root.appendingPathComponent("exports")
-        try fm.createDirectory(at: exports, withIntermediateDirectories: true)
+        // Temporary workspace (for conversion + staging)
+        let tmpRoot = fm.temporaryDirectory.appendingPathComponent("Compass-\(UUID().uuidString)")
+        let tmpExports = tmpRoot.appendingPathComponent("exports")
+        try fm.createDirectory(at: tmpExports, withIntermediateDirectories: true)
 
-        // DOCX → TXT
-        let txtURL = root.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".txt")
+        // ✅ Stable exports location in real home directory
+        let sharedExports = fm.homeDirectoryForCurrentUser
+            .appendingPathComponent("Dev/Compass/exports", isDirectory: true)
+        try fm.createDirectory(at: sharedExports, withIntermediateDirectories: true)
+
+        // 👇 Visibility: confirm which dir we are using
+        print("DocxPipeline using exports dir →", sharedExports.path)
+
+        // DOCX → TXT (into temp)
+        let txtURL = tmpRoot.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".txt")
         try convertDocxToTxt(input: input, output: txtURL)
 
         // Read plain text
         let raw = try String(contentsOf: txtURL, encoding: .utf8)
         let paragraphs = splitIntoParagraphs(raw)
+
+        // Phase-1 capture (same-line only). Capture file is written to sharedExports.
+        CapturePhase1.runSameLineCapture(
+            docId: input.deletingPathExtension().lastPathComponent,
+            paragraphs: paragraphs,
+            exportsDir: sharedExports
+        )
 
         // Build HTML body
         var body = "<article>\n"
@@ -54,12 +71,21 @@ enum DocxPipeline {
         }
         body += "</article>\n"
 
-        // Wrap & write
+        // Wrap HTML
         let html = wrapAsPage(bodyHTML: body, title: "Compass — \(input.lastPathComponent)")
-        let out = exports.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".html")
-        try html.write(to: out, atomically: true, encoding: .utf8)
 
-        return .init(htmlURL: out,
+        // Write to temp first
+        let tmpHTML = tmpExports.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".html")
+        try html.write(to: tmpHTML, atomically: true, encoding: .utf8)
+
+        // Then copy/replace into the shared exports folder
+        let sharedHTML = sharedExports.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".html")
+        if fm.fileExists(atPath: sharedHTML.path) {
+            try fm.removeItem(at: sharedHTML)
+        }
+        try fm.copyItem(at: tmpHTML, to: sharedHTML)
+
+        return .init(htmlURL: sharedHTML,
                      docID: input.deletingPathExtension().lastPathComponent,
                      version: 1)
     }
@@ -84,22 +110,15 @@ enum DocxPipeline {
 
     // MARK: - Text shaping
 
-    // Replace your current splitIntoParagraphs(_:) with this:
-
     private static func splitIntoParagraphs(_ s: String) -> [String] {
-        // Normalize CRLF → LF
         let norm = s.replacingOccurrences(of: "\r\n", with: "\n")
-        // Collapse runs of 2+ blank lines down to exactly two newlines
         let collapsed = norm.replacingOccurrences(of: "\n{2,}", with: "\n\n", options: .regularExpression)
-        // Now split on the literal delimiter
         return collapsed
             .components(separatedBy: "\n\n")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
     }
 
-
-    /// Demo-grade sentence split: keep ., !, ?; avoid decimals like 3.5
     private static func splitIntoSentences(_ text: String) -> [String] {
         let norm = text.replacingOccurrences(of: "\\s+", with: " ",
                                              options: .regularExpression)
@@ -144,7 +163,7 @@ enum DocxPipeline {
           <script>
             addEventListener('click', function(e){
               var t = e.target;
-              if(t.classList && t.classList.contains('sent')){
+              if (t.classList && t.classList.contains('sent')) {
                 t.classList.toggle('hl');
               }
             });

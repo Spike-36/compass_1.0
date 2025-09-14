@@ -8,8 +8,9 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @State private var htmlURL: URL?
     @State private var status = "Ready"
-    @State private var useDebugView = false   // ON = inline test page, OFF = pipeline output
-    @State private var sourceURL: URL?        // user-selected DOCX/PDF
+    @State private var useDebugView = false     // ON = inline test page, OFF = pipeline output
+    @State private var sourceURL: URL?          // user-selected DOCX/PDF
+    @State private var showDBViewer = false     // 👈 new: present DatabaseViewer sheet
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,6 +19,12 @@ struct ContentView: View {
                 Toggle("Debug WebView", isOn: $useDebugView)
                     .toggleStyle(.switch)
                     .help("ON: show inline test page. OFF: show pipeline output")
+
+                // 👇 new: DB viewer button (only when in Debug mode)
+                if useDebugView {
+                    Button("DB Viewer") { showDBViewer = true }
+                        .help("Open a quick, read-only view of the bundled compass.db")
+                }
 
                 Divider().frame(height: 18)
 
@@ -66,10 +73,8 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            // Prompt to pick a file on first launch
             if sourceURL == nil { chooseSource() }
         }
-        // keep the status hint in sync when toggling views (new two-arg version avoids deprecation)
         .onChange(of: useDebugView) { _, newValue in
             if newValue {
                 status = "Debug mode: InlineProbeView"
@@ -79,6 +84,11 @@ struct ContentView: View {
                 status = "Pipeline mode (no HTML yet)"
             }
         }
+        // 👇 new: DB Viewer sheet
+        .sheet(isPresented: $showDBViewer) {
+            NavigationView { DatabaseViewer() }   // uses the bundle’s compass.db
+                .frame(minWidth: 700, minHeight: 500)
+        }
     }
 
     // MARK: - Actions
@@ -86,10 +96,7 @@ struct ContentView: View {
     private func chooseSource() {
         let panel = NSOpenPanel()
         panel.title = "Choose a document"
-        panel.allowedContentTypes = [
-            UTType(filenameExtension: "docx")!,
-            .pdf
-        ]
+        panel.allowedContentTypes = [UTType(filenameExtension: "docx")!, .pdf]
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.begin { resp in
