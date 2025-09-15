@@ -1,7 +1,7 @@
 # load_capture.py
 # Compass
 #
-# Created by Peter Milligan on 13/09/2025.
+# Load .capture.ndjson into the sentences table, replacing any prior rows for that doc_id.
 
 import sqlite3, json
 from pathlib import Path
@@ -30,6 +30,24 @@ def load_file(ndjson_path: Path):
         cur = conn.cursor()
         count = 0
         with ndjson_path.open("r", encoding="utf-8") as f:
+            # read first line
+            first_line = json.loads(next(f))
+            doc_id = first_line["doc_id"]
+            # clear any previous entries for this document
+            cur.execute("DELETE FROM sentences WHERE doc_id = ?", (doc_id,))
+            # insert first line
+            cur.execute("""
+                INSERT INTO sentences (doc_id, block_type, block_number, sentence_index, text)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                first_line["doc_id"],
+                first_line["block_type"],
+                int(first_line["block_number"]),
+                int(first_line["sentence_index"]),
+                first_line["text"]
+            ))
+            count = 1
+            # process the rest
             for line in f:
                 if not line.strip():
                     continue
@@ -46,12 +64,12 @@ def load_file(ndjson_path: Path):
                 ))
                 count += 1
         conn.commit()
-    print(f"Loaded {count} rows from {ndjson_path} into {DB_PATH}")
+    print(f"Loaded {count} fresh rows for {doc_id} from {ndjson_path}")
 
 def main():
-    # usage: python db/load_capture.py testcompass2.capture.ndjson
+    # usage: python3 load_capture.py <capture_file.ndjson>
     if len(sys.argv) != 2:
-        print("Usage: python db/load_capture.py <capture_file.ndjson>")
+        print("Usage: python3 load_capture.py <capture_file.ndjson>")
         sys.exit(1)
     nd = Path(sys.argv[1])
     if not nd.is_absolute():
