@@ -1,0 +1,21 @@
+# 📑 Compass Specs & Documentation
+
+This folder holds the evolving specifications, mappings, and working notes for the Compass project.  
+Use this index as the entry point.
+
+---
+
+## Core Specs
+- [Compass MVP Spec](./Compass-MVP-Spec.md)  
+- [Compass MVP Spec v1.4.2 (snapshot)](./Compass-MVP-Spec-v1.4.2.md)  
+- [Data Model & Domain Mapping](./Data-Model-Domain-Mapping.md)  
+- [Bilingual Mapping](./Bilingual-Mapping.md)  
+
+## Planning & Ops
+- [Next Steps – 16 Sept](./Next-Steps-16-09.md)  
+- [Test Checklist](./Test-Checklist.md)  
+
+---
+
+✅ **Usage tip**: Treat `README.md` as the hub. Specs themselves stay stable, while “Next Steps” and “Test Checklist” roll forward as living docs.  
+# trigger ci
