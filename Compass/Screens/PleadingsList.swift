@@ -19,9 +19,6 @@ private struct BlockPair {
     var answer: [PleadingSentenceRow] = []
 }
 
-// macOS+Swift + SQLite convenience constant
-private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
-
 /// Where your live DB is (same as DatabaseViewer)
 private func defaultDBPath() -> String {
     let home = FileManager.default.homeDirectoryForCurrentUser
@@ -183,5 +180,4 @@ struct PleadingsList: View {
         PleadingsList(docID: "Roos.record.2007")
     }
 }
-
 

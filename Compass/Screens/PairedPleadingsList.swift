@@ -21,16 +21,6 @@ private struct BlockColumn: Identifiable {
     let answers: [SentenceItem]
 }
 
-// ── DB helpers ───────────────────────────────────────────────────────────────
-
-private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
-
-private func defaultDBPath() -> String {
-    FileManager.default
-        .homeDirectoryForCurrentUser
-        .appendingPathComponent("Dev/Compass/compass.db").path
-}
-
 // ── View ─────────────────────────────────────────────────────────────────────
 
 struct PairedPleadingsList: View {
@@ -62,8 +52,17 @@ struct PairedPleadingsList: View {
                                                     isTargeted: nil) { providers in
                                                 if let provider = providers.first {
                                                     _ = provider.loadObject(ofClass: String.self) { (str, _) in
-                                                        if let str, let droppedId = Int(str) {
-                                                            print("🟢 Dropped answer=\(droppedId) onto statement=\(s.id)")
+                                                        if let str,
+                                                           let droppedId = Int(str) {
+                                                            let ok = DB.shared.insertLink(
+                                                                statementId: s.id,
+                                                                responseId: droppedId
+                                                            )
+                                                            if ok {
+                                                                DispatchQueue.main.async {
+                                                                    load() // refresh UI
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                     return true
@@ -101,8 +100,7 @@ struct PairedPleadingsList: View {
                                         .foregroundStyle(.secondary)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .onDrag {
-                                            print("🟢 Dragging answer id=\(a.id)")
-                                            return NSItemProvider(object: String(a.id) as NSString)
+                                            NSItemProvider(object: String(a.id) as NSString)
                                         }
                                 }
                             }
@@ -124,73 +122,53 @@ struct PairedPleadingsList: View {
         blocks.removeAll()
 
         DispatchQueue.global(qos: .userInitiated).async {
-            var db: OpaquePointer?
-            let path = defaultDBPath()
-            guard sqlite3_open(path, &db) == SQLITE_OK, let db else {
-                DispatchQueue.main.async {
-                    self.error = "Failed to open DB at \(path)"
-                }
-                return
-            }
-            defer { sqlite3_close(db) }
-
             var map: [Int: (statements: [SentenceItem], answers: [SentenceItem])] = [:]
 
             // 1. Sentences
             let sql = """
-            SELECT id, block_type, block_number, sentence_index, text
+            SELECT id, block_type, block_number, text,
+                   CASE block_type WHEN 'statement' THEN 0 ELSE 1 END AS sort_order
             FROM sentences
             WHERE doc_id = ?
-            ORDER BY block_number ASC,
-                     CASE block_type WHEN 'statement' THEN 0 ELSE 1 END,
-                     sentence_index ASC;
+            ORDER BY block_number ASC, sort_order ASC;
             """
 
-            var stmt: OpaquePointer?
-            guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else {
-                DispatchQueue.main.async {
-                    self.error = "Prepare failed."
+            DatabaseManager.shared.query(
+                sql: sql,
+                bind: { stmt in
+                    sqlite3_bind_text(stmt, 1, (docID as NSString).utf8String, -1, SQLITE_TRANSIENT)
+                },
+                row: { stmt in
+                    let sid = Int(sqlite3_column_int(stmt, 0))
+                    let blockType = String(cString: sqlite3_column_text(stmt, 1))
+                    let blockNum = Int(sqlite3_column_int(stmt, 2))
+                    let text = clean(String(cString: sqlite3_column_text(stmt, 3)))
+
+                    var bucket = map[blockNum] ?? ([], [])
+                    let item = SentenceItem(id: sid, text: text)
+                    if blockType == "statement" {
+                        bucket.statements.append(item)
+                    } else {
+                        bucket.answers.append(item)
+                    }
+                    map[blockNum] = bucket
                 }
-                return
-            }
-            defer { sqlite3_finalize(stmt) }
+            )
 
-            sqlite3_bind_text(stmt, 1, (docID as NSString).utf8String, -1, SQLITE_TRANSIENT)
+            // 2. Links (FIXED: added `sql:` label)
+            DatabaseManager.shared.query(
+                sql: "SELECT statement_id, response_id FROM links;"
+            ) { stmt in
+                let statementId = Int(sqlite3_column_int(stmt, 0))
+                let responseId  = Int(sqlite3_column_int(stmt, 1))
 
-            while sqlite3_step(stmt) == SQLITE_ROW {
-                let sid = Int(sqlite3_column_int(stmt, 0))
-                let blockType = String(cString: sqlite3_column_text(stmt, 1))
-                let blockNum = Int(sqlite3_column_int(stmt, 2))
-                let text = clean(String(cString: sqlite3_column_text(stmt, 4)))
-
-                var bucket = map[blockNum] ?? ([], [])
-                let item = SentenceItem(id: sid, text: text)
-                if blockType == "statement" {
-                    bucket.statements.append(item)
-                } else {
-                    bucket.answers.append(item)
-                }
-                map[blockNum] = bucket
-            }
-
-            // 2. Links
-            let linkSQL = "SELECT statement_id, response_id FROM links;"
-            var linkStmt: OpaquePointer?
-            if sqlite3_prepare_v2(db, linkSQL, -1, &linkStmt, nil) == SQLITE_OK, let linkStmt {
-                while sqlite3_step(linkStmt) == SQLITE_ROW {
-                    let statementId = Int(sqlite3_column_int(linkStmt, 0))
-                    let responseId  = Int(sqlite3_column_int(linkStmt, 1))
-                    print("🔗 Link found: \(statementId) → \(responseId)")
-
-                    for (blockNum, bucket) in map {
-                        if let idx = bucket.statements.firstIndex(where: { $0.id == statementId }) {
-                            var updatedStatements = bucket.statements
-                            updatedStatements[idx].linkedResponseIds.append(responseId)
-                            map[blockNum] = (updatedStatements, bucket.answers)
-                        }
+                for (blockNum, bucket) in map {
+                    if let idx = bucket.statements.firstIndex(where: { $0.id == statementId }) {
+                        var updatedStatements = bucket.statements
+                        updatedStatements[idx].linkedResponseIds.append(responseId)
+                        map[blockNum] = (updatedStatements, bucket.answers)
                     }
                 }
-                sqlite3_finalize(linkStmt)
             }
 
             // 3. Build result
@@ -201,7 +179,6 @@ struct PairedPleadingsList: View {
 
             DispatchQueue.main.async {
                 self.blocks = results
-                print("DEBUG: Loaded \(results.count) block(s)")
             }
         }
     }

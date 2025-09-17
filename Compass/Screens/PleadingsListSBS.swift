@@ -1,3 +1,4 @@
+
 //
 //  PleadingsListSBS.swift
 //  Compass
@@ -19,9 +20,6 @@ private struct BlockPair: Identifiable {
     var statement: [PleadingSentenceRow] = []
     var answer: [PleadingSentenceRow] = []
 }
-
-// macOS+Swift + SQLite convenience constant
-private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 private func defaultDBPath() -> String {
     let home = FileManager.default.homeDirectoryForCurrentUser
@@ -179,10 +177,3 @@ struct PleadingsListSBS: View {
         PleadingsListSBS(docID: "Roos.record.2007")
     }
 }
-//
-//  PleadingsListSBS.swift
-//  Compass
-//
-//  Created by Peter Milligan on 15/09/2025.
-//
-
