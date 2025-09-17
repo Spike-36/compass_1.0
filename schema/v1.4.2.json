@@ -1,8 +1,102 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Compass MVP Export v1.4.2",
   "type": "object",
   "properties": {
-    "id": { "type": "string" }
+    "schemaVersion": { "const": "1.4.2" },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "data": {
+      "type": "object",
+      "properties": {
+        "sentences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" },
+              "labels": {
+                "type": "array",
+                "items": { "type": "string", "maxLength": 80 },
+                "maxItems": 10,
+                "uniqueItems": true
+              },
+              "links": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "status": {
+                "type": "string",
+                "enum": ["admitted", "not_admitted", "disputed", "unknown", "unset"]
+              },
+              "themeId": { "type": "string" },
+              "partyId": { "type": "string" },
+              "systemLabel": { "type": "string" }
+            },
+            "required": ["id", "text", "status", "themeId"]
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "sourceSentenceId": { "type": "string" },
+              "targetSentenceId": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["claim_response", "supports", "contradicts", "cites"]
+              }
+            },
+            "required": ["id", "sourceSentenceId", "targetSentenceId", "type"]
+          }
+        },
+        "themes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "sentenceIds": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["id", "sentenceIds"]
+          }
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "sentenceIds": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["id", "name", "sentenceIds"]
+          }
+        },
+        "parties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "role": { "type": "string", "enum": ["claimant", "defendant", "other"] }
+            },
+            "required": ["id", "role"]
+          }
+        }
+      },
+      "required": ["sentences", "links", "themes", "issues", "parties"]
+    }
   },
-  "required": ["id"]
+  "required": ["schemaVersion", "exportedAt", "data"]
 }

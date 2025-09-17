@@ -1,0 +1,57 @@
+# Compass Build Workflow Guide
+
+This folder has five spec docs. Each one has a job.  
+Follow this sequence when building:
+
+---
+
+## 1. Compass MVP Spec (v1.4.2)
+- **Purpose:** Defines the scope of the MVP.  
+- **When to use:** Before writing code or adding features.  
+- **Rule:** If it’s not in here, don’t build it.  
+
+---
+
+## 2. Data Model / Domain Mapping
+- **Purpose:** Blueprint of the data (tables, JSON, API fields).  
+- **When to use:** Any time you touch database, fixtures, or backend APIs.  
+- **Rule:** Don’t invent new fields; check here first.  
+
+---
+
+## 3. Bilingual Mapping
+- **Purpose:** Special rules for two-language support.  
+- **When to use:** Any code or schema that shows, stores, or exports bilingual content.  
+- **Rule:** Don’t guess—use the mapping.  
+
+---
+
+## 4. Next Steps
+- **Purpose:** Current action plan.  
+- **When to use:** Day-to-day coding decisions.  
+- **Rule:** Build in the order listed. Update this doc as things get done.  
+
+---
+
+## 5. Test Checklist
+- **Purpose:** QA notebook. Tracks what to verify.  
+- **When to use:** After coding a feature.  
+- **Rule:** Add a line here every time you add or change a feature.  
+
+---
+
+## Daily Flow
+1. Open **Next Steps** → pick what to do today.  
+2. Check **MVP Spec** → confirm it’s in scope.  
+3. Check **Data Model** (and **Bilingual Mapping** if relevant).  
+4. Build the feature.  
+5. Update **Test Checklist** with how you’ll prove it works.  
+
+---
+
+This way you always know:
+- *What* to build (Spec)  
+- *How* to shape the data (Model)  
+- *Language rules* (Mapping)  
+- *What’s next* (Next Steps)  
+- *How to test it* (Checklist)

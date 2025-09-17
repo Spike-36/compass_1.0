@@ -1,133 +1,58 @@
 {
-  "sentences": [
-    {
-      "id": "s1",
-      "text": "The claimant alleges breach of contract due to late delivery.",
-      "labels": ["Claim", "Contract", "Delivery"],
-      "links": ["l1"],
-      "status": "disputed",
-      "themeId": "t1"
-    },
-    {
-      "id": "s2",
-      "text": "The defendant asserts delivery was within the agreed timeframe.",
-      "labels": ["Response", "Delivery"],
-      "links": ["l1"],
-      "status": "disputed",
-      "themeId": "t1"
-    },
-    {
-      "id": "s3",
-      "text": "The parties agree a contract was signed on 1 Jan 2020.",
-      "labels": ["Agreed Fact", "Contract Date"],
-      "links": [],
-      "status": "agreed",
-      "themeId": "t2"
-    },
-    {
-      "id": "s4",
-      "text": "The claimant claims damages of £50,000.",
-      "labels": ["Claim", "Damages"],
-      "links": ["l2"],
-      "status": "disputed",
-      "themeId": "t3"
-    },
-    {
-      "id": "s5",
-      "text": "The defendant argues damages, if any, should be capped at £10,000.",
-      "labels": ["Response", "Damages"],
-      "links": ["l2"],
-      "status": "disputed",
-      "themeId": "t3"
-    },
-    {
-      "id": "s6",
-      "text": "It is unclear whether the contract included a liquidated damages clause.",
-      "labels": ["Unclear Fact", "Damages Clause"],
-      "links": [],
-      "status": "unknown",
-      "themeId": "t3"
-    },
-    {
-      "id": "s7",
-      "text": "The claimant relies on an email sent 15 Dec 2019 as evidence of contract terms.",
-      "labels": ["Evidence", "Email"],
-      "links": ["l3"],
-      "status": "disputed",
-      "themeId": "t2"
-    },
-    {
-      "id": "s8",
-      "text": "The defendant disputes the authenticity of the 15 Dec 2019 email.",
-      "labels": ["Response", "Evidence"],
-      "links": ["l3"],
-      "status": "disputed",
-      "themeId": "t2"
-    },
-    {
-      "id": "s9",
-      "text": "Both parties agree the goods were delivered on 5 Feb 2020.",
-      "labels": ["Agreed Fact", "Delivery Date"],
-      "links": [],
-      "status": "agreed",
-      "themeId": "t1"
-    },
-    {
-      "id": "s10",
-      "text": "The claimant contends the goods delivered did not meet the contract specification.",
-      "labels": ["Claim", "Quality"],
-      "links": [],
-      "status": "disputed",
-      "themeId": "t4"
-    }
-  ],
-  "links": [
-    {
-      "id": "l1",
-      "sourceSentenceId": "s1",
-      "targetSentenceId": "s2",
-      "type": "claim-response"
-    },
-    {
-      "id": "l2",
-      "sourceSentenceId": "s4",
-      "targetSentenceId": "s5",
-      "type": "claim-response"
-    },
-    {
-      "id": "l3",
-      "sourceSentenceId": "s7",
-      "targetSentenceId": "s8",
-      "type": "claim-response"
-    }
-  ],
-  "themes": [
-    {
-      "id": "t1",
-      "name": "Delivery Obligations",
-      "sentenceIds": ["s1", "s2", "s9"]
-    },
-    {
-      "id": "t2",
-      "name": "Contract Formation",
-      "sentenceIds": ["s3", "s7", "s8"]
-    },
-    {
-      "id": "t3",
-      "name": "Damages and Remedies",
-      "sentenceIds": ["s4", "s5", "s6"]
-    },
-    {
-      "id": "t4",
-      "name": "Quality of Goods",
-      "sentenceIds": ["s10"]
-    }
-  ],
-  "issues": [
-    {
-      "id": "i1",
-      "name": "Breach of Contract",
-      "sentenceIds": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10"]
-    }
-  ]
+  "schemaVersion": "1.4.2",
+  "exportedAt": "2025-09-17T12:00:00Z",
+  "data": {
+    "sentences": [
+      {
+        "id": "s1",
+        "text": "The claimant entered into the contract on 1 January 2020.",
+        "labels": ["contract", "date"],
+        "links": ["l1"],
+        "status": "admitted",
+        "themeId": "t1",
+        "partyId": "p1"
+      },
+      {
+        "id": "s2",
+        "text": "The defendant denies entering into the contract.",
+        "status": "disputed",
+        "themeId": "t1",
+        "partyId": "p2"
+      }
+    ],
+    "links": [
+      {
+        "id": "l1",
+        "sourceSentenceId": "s1",
+        "targetSentenceId": "s2",
+        "type": "claim_response"
+      }
+    ],
+    "themes": [
+      {
+        "id": "t1",
+        "name": "Formation of Contract",
+        "sentenceIds": ["s1", "s2"]
+      }
+    ],
+    "issues": [
+      {
+        "id": "i1",
+        "name": "Validity of Contract",
+        "sentenceIds": ["s1", "s2"]
+      }
+    ],
+    "parties": [
+      {
+        "id": "p1",
+        "name": "Claimant",
+        "role": "claimant"
+      },
+      {
+        "id": "p2",
+        "name": "Defendant",
+        "role": "defendant"
+      }
+    ]
+  }
 }

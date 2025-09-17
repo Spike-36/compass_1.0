@@ -2,11 +2,11 @@
 //  CapturePhase1.swift
 //  Compass
 //
-//  Phase-1: capture SAME-LINE Statement/Answer headers and write NDJSON.
-//  Rendering is unaffected.
+//  Phase-1: capture SAME-LINE Statement/Answer headers and write NDJSON + refresh DB.
 //
 
 import Foundation
+import SQLite3
 
 enum CapturePhase1 {
 
@@ -33,6 +33,7 @@ enum CapturePhase1 {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             if cleaned.isEmpty { continue }
 
+            // 🔑 if a header appears later in the line, split into head + tail
             if let secondHeader = findNextHeaderStart(in: cleaned),
                secondHeader.lowerBound != cleaned.startIndex {
                 let head = String(cleaned[..<secondHeader.lowerBound])
@@ -43,20 +44,34 @@ enum CapturePhase1 {
                 cleaned = head
             }
 
+            print("LINE:", cleaned)
+
             if let hit = matchSameLineHeader(cleaned) {
                 let sents = SentenceSplitter.split(hit.body)
-                if sents.isEmpty { emptyBlocks += 1 }
 
-                for (idx, s) in sents.enumerated() {
-                    sentences += 1
+                if sents.isEmpty {
+                    // 🔑 NEW: still emit a placeholder record to create the block
+                    emptyBlocks += 1
                     records.append(CaptureRecord(
                         doc_id: docId,
                         block_type: hit.type.rawValue,
                         block_number: hit.number,
-                        sentence_index: idx + 1,
-                        text: s
+                        sentence_index: 1,
+                        text: ""   // explicit placeholder
                     ))
+                } else {
+                    for (idx, s) in sents.enumerated() {
+                        sentences += 1
+                        records.append(CaptureRecord(
+                            doc_id: docId,
+                            block_type: hit.type.rawValue,
+                            block_number: hit.number,
+                            sentence_index: idx + 1,
+                            text: s
+                        ))
+                    }
                 }
+
                 switch hit.type {
                 case .statement: statements += 1
                 case .answer:    answers += 1
@@ -75,16 +90,20 @@ enum CapturePhase1 {
             NSLog("capture: failed to write NDJSON: \(error.localizedDescription)")
         }
 
+        // 🔥 NEW: also refresh the DB
+        writeToDatabase(records: records, docId: docId)
+
         print("capture: statements=\(statements) answers=\(answers) sentences=\(sentences) empty_blocks=\(emptyBlocks)")
     }
 
     // MARK: - Header detection
 
     private static func matchSameLineHeader(_ line: String) -> (type: BlockType, number: Int, body: String)? {
+        // Loosened regex: allow body to be empty (so "Stat 2." is valid)
         let patterns: [(BlockType, NSRegularExpression)] = {
             let raw: [(BlockType, String)] = [
-                (.statement, #"^\s*(?:Stat\.?|Statement)\s*(\d+)\s*[\.:]\s*([\s\S]*\S)\s*$"#),
-                (.answer,    #"^\s*(?:Ans\.?|Answer)\s*(\d+)\s*[\.:]\s*([\s\S]*\S)\s*$"#)
+                (.statement, #"^\s*(?:Stat\.?|Statement)\s*(\d+)\s*[\.:]?\s*(.*)?$"#),
+                (.answer,    #"^\s*(?:Ans\.?|Answer)\s*(\d+)\s*[\.:]?\s*(.*)?$"#)
             ]
             return raw.compactMap { (t, p) in
                 (try? NSRegularExpression(pattern: p,
@@ -98,25 +117,26 @@ enum CapturePhase1 {
             if let m = rx.firstMatch(in: line, options: [], range: ns) {
                 guard
                     let numRange  = Range(m.range(at: 1), in: line),
-                    let bodyRange = Range(m.range(at: 2), in: line),
                     let number    = Int(line[numRange])
                 else { continue }
-                let body = String(line[bodyRange]).trimmingCharacters(in: .whitespacesAndNewlines)
-                return (type, number, body)
+                let bodyRange = Range(m.range(at: 2), in: line)
+                let body = bodyRange.map { String(line[$0]) } ?? ""
+                return (type, number, body.trimmingCharacters(in: .whitespacesAndNewlines))
             }
         }
         return nil
     }
 
+    /// Detect embedded "Stat 2." or "Ans 3." even after punctuation
     private static func findNextHeaderStart(in s: String) -> Range<String.Index>? {
-        let pat = #"(?i)(?:^|\s)(?:Stat\.?|Statement|Ans\.?|Answer)\s+\d+\s*[.:]"#
+        let pat = #"(?i)(Stat\.?|Statement|Ans\.?|Answer)\s+\d+\s*[.:]"#
         guard let rx = try? NSRegularExpression(pattern: pat) else { return nil }
         let ns = NSRange(s.startIndex..<s.endIndex, in: s)
         guard let m = rx.firstMatch(in: s, range: ns) else { return nil }
         return Range(m.range, in: s)
     }
 
-    // MARK: - IO
+    // MARK: - IO (NDJSON)
 
     private static func writeNDJSON(_ records: [CaptureRecord], to url: URL) throws {
         let encoder = JSONEncoder()
@@ -138,6 +158,71 @@ enum CapturePhase1 {
     private static func stripBidi(_ s: String) -> String {
         s.replacingOccurrences(of: "[\u{200E}\u{200F}\u{202A}-\u{202E}]",
                                with: "", options: .regularExpression)
+    }
+
+    // MARK: - IO (SQLite DB)
+
+    private static func writeToDatabase(records: [CaptureRecord], docId: String) {
+        let dbPath = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Dev/Compass/compass.db").path
+
+        var db: OpaquePointer?
+        if sqlite3_open(dbPath, &db) != SQLITE_OK {
+            print("⚠️ Failed to open DB at \(dbPath)")
+            return
+        }
+        defer { sqlite3_close(db) }
+
+        // ensure schema
+        let schemaSQL = """
+        CREATE TABLE IF NOT EXISTS sentences (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doc_id TEXT NOT NULL,
+            block_type TEXT NOT NULL,
+            block_number INTEGER NOT NULL,
+            sentence_index INTEGER NOT NULL,
+            text TEXT NOT NULL
+        )
+        """
+        if sqlite3_exec(db, schemaSQL, nil, nil, nil) != SQLITE_OK {
+            print("⚠️ Failed to ensure schema")
+            return
+        }
+
+        // delete old rows
+        var delStmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, "DELETE FROM sentences WHERE doc_id = ?", -1, &delStmt, nil) == SQLITE_OK {
+            sqlite3_bind_text(delStmt, 1, (docId as NSString).utf8String, -1, nil)
+            sqlite3_step(delStmt)
+        }
+        sqlite3_finalize(delStmt)
+
+        // insert new rows
+        let insertSQL = """
+        INSERT INTO sentences (doc_id, block_type, block_number, sentence_index, text)
+        VALUES (?, ?, ?, ?, ?)
+        """
+        var insStmt: OpaquePointer?
+        if sqlite3_prepare_v2(db, insertSQL, -1, &insStmt, nil) != SQLITE_OK {
+            print("⚠️ Prepare insert failed")
+            return
+        }
+
+        for rec in records {
+            sqlite3_bind_text(insStmt, 1, (rec.doc_id as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(insStmt, 2, (rec.block_type as NSString).utf8String, -1, nil)
+            sqlite3_bind_int(insStmt, 3, Int32(rec.block_number))
+            sqlite3_bind_int(insStmt, 4, Int32(rec.sentence_index))
+            sqlite3_bind_text(insStmt, 5, (rec.text as NSString).utf8String, -1, nil)
+
+            if sqlite3_step(insStmt) != SQLITE_DONE {
+                print("⚠️ Insert failed for row:", rec)
+            }
+            sqlite3_reset(insStmt)
+        }
+        sqlite3_finalize(insStmt)
+
+        print("✅ DB refreshed for \(docId) with \(records.count) rows")
     }
 }
 

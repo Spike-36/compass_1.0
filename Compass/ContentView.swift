@@ -6,11 +6,20 @@ import AppKit
 import UniformTypeIdentifiers
 
 struct ContentView: View {
+    // HTML preview (pipeline output)
     @State private var htmlURL: URL?
+    // Selected source the user picked (DOCX / PDF)
+    @State private var sourceURL: URL?
+    // Last processed document id (used by Sentence View)
+    @State private var lastDocID: String?
+
+    // UI state
     @State private var status = "Ready"
-    @State private var useDebugView = false     // ON = inline test page, OFF = pipeline output
-    @State private var sourceURL: URL?          // user-selected DOCX/PDF
-    @State private var showDBViewer = false     // 👈 new: present DatabaseViewer sheet
+    @State private var useDebugView = false
+    @State private var showDBViewer = false
+    @State private var showSentenceView = false
+    @State private var showSBSView = false
+    @State private var showPairedView = false   // <-- new
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,7 +29,6 @@ struct ContentView: View {
                     .toggleStyle(.switch)
                     .help("ON: show inline test page. OFF: show pipeline output")
 
-                // 👇 new: DB viewer button (only when in Debug mode)
                 if useDebugView {
                     Button("DB Viewer") { showDBViewer = true }
                         .help("Open a quick, read-only view of the bundled compass.db")
@@ -34,6 +42,16 @@ struct ContentView: View {
                     .truncationMode(.middle)
 
                 Spacer()
+
+                // Open Sentence View (enabled after pipeline produced a doc id)
+                Button("Sentence View…") { showSentenceView = true }
+                    .disabled(lastDocID == nil)
+
+                Button("Side-by-Side…") { showSBSView = true }
+                    .disabled(lastDocID == nil)
+
+                Button("Paired Pleadings…") { showPairedView = true }   // <-- new button
+                    .disabled(lastDocID == nil)
 
                 Button("Choose…") { chooseSource() }
 
@@ -84,10 +102,40 @@ struct ContentView: View {
                 status = "Pipeline mode (no HTML yet)"
             }
         }
-        // 👇 new: DB Viewer sheet
+        // DB Viewer sheet
         .sheet(isPresented: $showDBViewer) {
-            NavigationView { DatabaseViewer() }   // uses the bundle’s compass.db
+            NavigationView { DatabaseViewer() }
                 .frame(minWidth: 700, minHeight: 500)
+        }
+        // Sentence View sheet
+        .sheet(isPresented: $showSentenceView) {
+            if let id = lastDocID {
+                NavigationView { PleadingsList(docID: id) }
+                    .frame(minWidth: 700, minHeight: 500)
+            } else {
+                Text("No document loaded yet.")
+                    .frame(minWidth: 400, minHeight: 200)
+            }
+        }
+        // Side-by-Side View sheet
+        .sheet(isPresented: $showSBSView) {
+            if let id = lastDocID {
+                NavigationView { PleadingsListSBS(docID: id) }
+                    .frame(minWidth: 1200, minHeight: 700)
+            } else {
+                Text("No document loaded yet.")
+                    .frame(minWidth: 400, minHeight: 200)
+            }
+        }
+        // Paired Pleadings View sheet
+        .sheet(isPresented: $showPairedView) {
+            if let id = lastDocID {
+                NavigationView { PairedPleadingsList(docID: id) }
+                    .frame(minWidth: 1000, minHeight: 700)
+            } else {
+                Text("No document loaded yet.")
+                    .frame(minWidth: 400, minHeight: 200)
+            }
         }
     }
 
@@ -113,15 +161,18 @@ struct ContentView: View {
         guard let src = sourceURL else {
             status = "Select a DOCX/PDF first"
             htmlURL = nil
+            lastDocID = nil
             return
         }
         status = "Processing…"
         do {
             let res = try DocxPipeline.run(input: src)
             htmlURL = res.htmlURL
+            lastDocID = res.docID
             status = "Loaded \(res.docID)@v\(res.version) → \(res.htmlURL.lastPathComponent)"
         } catch {
             htmlURL = nil
+            lastDocID = nil
             status = "Error: \(error.localizedDescription)"
         }
     }

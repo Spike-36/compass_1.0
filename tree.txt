@@ -1,0 +1,69 @@
+.
+├── .gitignore
+├── .tables
+├── Compass
+│   ├── ) DocumentIdentity.swift
+│   ├── AnchorChecksum.swift
+│   ├── Assets.xcassets
+│   │   ├── AccentColor.colorset
+│   │   ├── AppIcon.appiconset
+│   │   └── Contents.json
+│   ├── BlockHeaderDetector.swift
+│   ├── CapturePhase1.swift
+│   ├── Compass.entitlements
+│   ├── CompassApp.swift
+│   ├── ContentView.swift
+│   ├── DatabaseViewer.swift
+│   ├── DebugStubs.swift
+│   ├── DemoPipeline.swift
+│   ├── DocumentParser.swift
+│   ├── DocxPipeline.swift
+│   ├── FeatureFlags.swift
+│   ├── Hashing.swift
+│   ├── HTMLExporter.swift
+│   ├── HTMLExportResult.swift
+│   ├── IDSpec.swift
+│   ├── InlineProbeView.swift
+│   ├── LoggingWebView.swift
+│   ├── Manifest.swift
+│   ├── ManifestUpdate.swift
+│   ├── Screens
+│   │   ├── PairedPleadingsList.swift
+│   │   ├── PleadingsList.swift
+│   │   └── PleadingsListSBS.swift
+│   ├── SentenceSplitter.swift
+│   ├── Slug.swift
+│   ├── UUIDv5.swift
+│   ├── VersionIndex.swift
+│   ├── WebKitSafeMode.swift
+│   └── WebView.swift
+├── compass.db
+├── Compass.xcodeproj
+│   ├── project.pbxproj
+│   ├── project.xcworkspace
+│   │   ├── contents.xcworkspacedata
+│   │   ├── xcshareddata
+│   │   └── xcuserdata
+│   └── xcuserdata
+│       └── petermilligan.xcuserdatad
+├── CompassTests
+│   ├── _CurlyQuoteAuditTests.swift
+│   ├── CompassTests.swift
+│   ├── DocumentIdentityTests.swift
+│   └── DocumentParsingTests.swift
+├── db
+│   ├── grouped_queries.py
+│   ├── init_db.py
+│   ├── load_capture.py
+│   ├── queries.py
+│   └── schema.sql
+├── exports
+│   ├── Roos.record.2007.capture.ndjson
+│   └── Roos.record.2007.html
+├── import_test.py
+├── SELECT
+├── tree.txt
+└── utils
+    └── FuzzyMatcher.swift
+
+16 directories, 51 files

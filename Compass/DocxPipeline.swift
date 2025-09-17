@@ -110,13 +110,41 @@ enum DocxPipeline {
 
     // MARK: - Text shaping
 
+    /// Split text into paragraphs. Detects Stat/Ans headers even when inline.
     private static func splitIntoParagraphs(_ s: String) -> [String] {
+        // Normalize line endings
         let norm = s.replacingOccurrences(of: "\r\n", with: "\n")
+
+        // Collapse multiple blank lines
         let collapsed = norm.replacingOccurrences(of: "\n{2,}", with: "\n\n", options: .regularExpression)
-        return collapsed
-            .components(separatedBy: "\n\n")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
+
+        // Regex: start a new para before "Stat N." or "Ans. N."
+        let pattern = #"(?=\b(?:Stat\s+\d+\.|Ans\.\s*\d+\.))"#
+        let regex = try! NSRegularExpression(pattern: pattern)
+
+        var parts: [String] = []
+        var start = collapsed.startIndex
+        let len = collapsed.utf16.count
+
+        for m in regex.matches(in: collapsed, range: NSRange(location: 0, length: len)) {
+            let idx = String.Index(utf16Offset: m.range.location, in: collapsed)
+            if idx > start {
+                let piece = String(collapsed[start..<idx]).trimmingCharacters(in: .whitespacesAndNewlines)
+                if !piece.isEmpty { parts.append(piece) }
+            }
+            start = idx
+        }
+
+        let tail = String(collapsed[start...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        if !tail.isEmpty { parts.append(tail) }
+
+        // Also split on double newlines inside chunks
+        return parts.flatMap { chunk in
+            chunk
+                .components(separatedBy: "\n\n")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        }
     }
 
     private static func splitIntoSentences(_ text: String) -> [String] {

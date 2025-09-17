@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		50536EF52E76B4A7009E561E /* import_test.py in Sources */ = {isa = PBXBuildFile; fileRef = 50536EF42E76B4A4009E561E /* import_test.py */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		50536E642E73B457009E561E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -28,10 +24,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		50536E552E73B456009E561E /* Compass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Compass.app; path = /Users/petermilligan/Dev/Compass/build/Debug/Compass.app; sourceTree = "<absolute>"; };
-		50536E632E73B457009E561E /* CompassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CompassTests.xctest; path = /Users/petermilligan/Dev/Compass/build/Debug/Compass.app/Contents/PlugIns/CompassTests.xctest; sourceTree = "<absolute>"; };
-		50536E6D2E73B457009E561E /* CompassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = CompassUITests.xctest; path = "/Users/petermilligan/Dev/Compass/build/Debug/CompassUITests-Runner.app/Contents/PlugIns/CompassUITests.xctest"; sourceTree = "<absolute>"; };
-		50536EF42E76B4A4009E561E /* import_test.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = import_test.py; sourceTree = "<group>"; };
+		508A01402E77B09000DA05EF /* Compass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Compass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		508A01412E77B09000DA05EF /* CompassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		508A01422E77B09000DA05EF /* CompassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompassUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -88,6 +83,11 @@
 			path = db;
 			sourceTree = "<group>";
 		};
+		508A01932E77F57600DA05EF /* utils */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = utils;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,10 +118,13 @@
 		50536E4C2E73B456009E561E = {
 			isa = PBXGroup;
 			children = (
+				508A01932E77F57600DA05EF /* utils */,
 				50536EE62E7556E6009E561E /* db */,
 				50536E572E73B456009E561E /* Compass */,
 				50536E662E73B457009E561E /* CompassTests */,
-				50536EF42E76B4A4009E561E /* import_test.py */,
+				508A01402E77B09000DA05EF /* Compass.app */,
+				508A01412E77B09000DA05EF /* CompassTests.xctest */,
+				508A01422E77B09000DA05EF /* CompassUITests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -143,12 +146,13 @@
 			fileSystemSynchronizedGroups = (
 				50536E572E73B456009E561E /* Compass */,
 				50536EE62E7556E6009E561E /* db */,
+				508A01932E77F57600DA05EF /* utils */,
 			);
 			name = Compass;
 			packageProductDependencies = (
 			);
 			productName = Compass;
-			productReference = 50536E552E73B456009E561E /* Compass.app */;
+			productReference = 508A01402E77B09000DA05EF /* Compass.app */;
 			productType = "com.apple.product-type.application";
 		};
 		50536E622E73B457009E561E /* CompassTests */ = {
@@ -171,7 +175,7 @@
 			packageProductDependencies = (
 			);
 			productName = CompassTests;
-			productReference = 50536E632E73B457009E561E /* CompassTests.xctest */;
+			productReference = 508A01412E77B09000DA05EF /* CompassTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		50536E6C2E73B457009E561E /* CompassUITests */ = {
@@ -191,7 +195,7 @@
 			packageProductDependencies = (
 			);
 			productName = CompassUITests;
-			productReference = 50536E6D2E73B457009E561E /* CompassUITests.xctest */;
+			productReference = 508A01422E77B09000DA05EF /* CompassUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -267,7 +271,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				50536EF52E76B4A7009E561E /* import_test.py in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
