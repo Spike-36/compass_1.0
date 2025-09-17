@@ -22,8 +22,8 @@ jobs:
 
       - name: Validate fixtures against schema
         run: |
-          ajv validate -s Compass/schema/v1.4.2.json -d Compass/fixtures/mini.json
-          ajv validate -s Compass/schema/v1.4.2.json -d Compass/fixtures/stress-10k.json
+          ajv validate -s schema/v1.4.2.json -d Compass/fixtures/mini.json
+          ajv validate -s schema/v1.4.2.json -d Compass/fixtures/stress-10k.json
 
   swift-build:
     runs-on: macos-latest
@@ -34,7 +34,13 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Build Swift project (macOS)
-        run: xcodebuild build -scheme Compass -destination 'platform=macOS'
+        run: |
+          xcodebuild build \
+            -scheme Compass \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
   swift-tests:
     runs-on: macos-latest
@@ -46,4 +52,10 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Run Swift tests (macOS)
-        run: xcodebuild test -scheme Compass -destination 'platform=macOS'
+        run: |
+          xcodebuild test \
+            -scheme Compass \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
