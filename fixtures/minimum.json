@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.4.2",
+  "exportedAt": "2025-09-17T12:00:00Z",
+  "data": {
+    "sentences": [
+      {
+        "id": "s1",
+        "text": "The contract was signed.",
+        "status": "admitted",
+        "themeId": "t1",
+        "partyId": "p1"
+      }
+    ],
+    "links": [],
+    "themes": [
+      {
+        "id": "t1",
+        "name": "Contract",
+        "sentenceIds": ["s1"]
+      }
+    ],
+    "issues": [
+      {
+        "id": "i1",
+        "name": "Existence of Contract",
+        "sentenceIds": ["s1"]
+      }
+    ],
+    "parties": [
+      {
+        "id": "p1",
+        "name": "Claimant",
+        "role": "claimant"
+      }
+    ]
+  }
+}
