@@ -22,6 +22,8 @@ jobs:
 
       - name: Validate fixtures against schema
         run: |
+          pwd
+          ls -R
           ajv validate -s schema/v1.4.2.json -d ./fixtures/mini.json
           ajv validate -s schema/v1.4.2.json -d ./fixtures/stress-10k.json
 
@@ -35,13 +37,9 @@ jobs:
 
       - name: Build Swift project
         run: |
-          xcodebuild build \
-            -scheme Compass \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          pwd
+          ls -R
+          xcodebuild build -scheme Compass -sdk macosx
 
   swift-tests:
     runs-on: macos-latest
@@ -54,10 +52,6 @@ jobs:
 
       - name: Run Swift tests
         run: |
-          xcodebuild test \
-            -scheme Compass \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          pwd
+          ls -R
+          xcodebuild test -scheme Compass -sdk macosx
