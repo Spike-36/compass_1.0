@@ -80,9 +80,30 @@ struct PairedPleadingsList: View {
 
                                             ForEach(s.linkedResponseIds, id: \.self) { rid in
                                                 if let ans = block.answers.first(where: { $0.id == rid }) {
-                                                    Text("↳ \(ans.text)")
-                                                        .font(.caption)
-                                                        .foregroundColor(.blue)
+                                                    HStack {
+                                                        Text("↳ \(ans.text)")
+                                                            .font(.caption)
+                                                            .foregroundColor(.blue)
+
+                                                        Button {
+                                                            let ok = DatabaseManager.shared.execute(
+                                                                sql: "DELETE FROM links WHERE statement_id = ? AND response_id = ?;",
+                                                                bind: { stmt in
+                                                                    sqlite3_bind_int(stmt, 1, Int32(s.id))
+                                                                    sqlite3_bind_int(stmt, 2, Int32(rid))
+                                                                }
+                                                            )
+                                                            if ok {
+                                                                DispatchQueue.main.async {
+                                                                    load() // refresh UI
+                                                                }
+                                                            }
+                                                        } label: {
+                                                            Image(systemName: "xmark.circle.fill")
+                                                                .foregroundColor(.red)
+                                                        }
+                                                        .buttonStyle(.plain)
+                                                    }
                                                 }
                                             }
                                         }
@@ -155,7 +176,7 @@ struct PairedPleadingsList: View {
                 }
             )
 
-            // 2. Links (FIXED: added `sql:` label)
+            // 2. Links
             DatabaseManager.shared.query(
                 sql: "SELECT statement_id, response_id FROM links;"
             ) { stmt in
