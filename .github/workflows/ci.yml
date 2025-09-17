@@ -34,9 +34,7 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Build Swift project
-        run: xcodebuild build \
-          -scheme Compass \
-          -destination 'platform=iOS Simulator,name=iPhone 14'
+        run: xcodebuild build -scheme Compass -destination 'platform=iOS Simulator,name=iPhone 14'
 
   swift-tests:
     runs-on: macos-latest
@@ -48,6 +46,4 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Run Swift tests
-        run: xcodebuild test \
-          -scheme Compass \
-          -destination 'platform=iOS Simulator,name=iPhone 14'
+        run: xcodebuild test -scheme Compass -destination 'platform=iOS Simulator,name=iPhone 14'
