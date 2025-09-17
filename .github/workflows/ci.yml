@@ -11,23 +11,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
+
       - name: Install ajv-cli
         run: npm install -g ajv-cli
+
       - name: Validate fixtures against schema
         run: |
-          ajv validate -s schema/v1.4.2.json -d fixtures/mini.json
+          ajv validate -s compass_1.0/schema/v1.4.2.json -d compass_1.0/fixtures/mini.json
+          ajv validate -s compass_1.0/schema/v1.4.2.json -d compass_1.0/fixtures/stress-10k.json
 
-  swift-tests:
+  swift-build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Xcode
+
+      - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build Swift project
+        run: set -o pipefail && xcodebuild build -scheme Compass -destination 'platform=iOS Simulator,name=iPhone 14' | xcpretty
+
+  swift-tests:
+    runs-on: macos-latest
+    needs: swift-build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
       - name: Run Swift tests
-        run: xcodebuild test \
-          -scheme Compass \
-          -destination 'platform=iOS Simulator,name=iPhone 14'
+        run: set -o pipefail && xcodebuild test -scheme Compass -destination 'platform=iOS Simulator,name=iPhone 14' | xcpretty
