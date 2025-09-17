@@ -22,10 +22,13 @@ jobs:
 
       - name: Validate fixtures against schema
         run: |
+          echo "=== Current working directory ==="
           pwd
+          echo "=== Repo tree ==="
           ls -R
-          ajv validate -s schema/v1.4.2.json -d ./fixtures/mini.json
-          ajv validate -s schema/v1.4.2.json -d ./fixtures/stress-10k.json
+          echo "=== Running AJV validation ==="
+          ajv validate -s schema/v1.4.2.json -d fixtures/mini.json
+          ajv validate -s schema/v1.4.2.json -d fixtures/stress-10k.json
 
   swift-build:
     runs-on: macos-latest
@@ -37,8 +40,11 @@ jobs:
 
       - name: Build Swift project
         run: |
+          echo "=== Current working directory ==="
           pwd
+          echo "=== Repo tree ==="
           ls -R
+          echo "=== Running xcodebuild build ==="
           xcodebuild build -scheme Compass -sdk macosx
 
   swift-tests:
@@ -52,6 +58,9 @@ jobs:
 
       - name: Run Swift tests
         run: |
+          echo "=== Current working directory ==="
           pwd
+          echo "=== Repo tree ==="
           ls -R
+          echo "=== Running xcodebuild test ==="
           xcodebuild test -scheme Compass -sdk macosx
