@@ -17,20 +17,34 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install ajv-cli
-        run: npm install -g ajv-cli
+      - name: Install ajv-cli + formats
+        run: npm install -g ajv-cli ajv-formats
 
-      - name: Validate ultra-minimal fixture
+      - name: Validate minimum fixture against schema
         run: |
-          ajv validate -s schema/v1.4.2.json -d fixtures/ultra-minimal.json
+          ajv -c ajv-formats validate \
+            -s schema/v1.4.2.json \
+            -d fixtures/minimum.json
 
   swift-build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Select latest Xcode
+      - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
 
-      - name: Build Swift project
-        run: xcodebuild build -scheme Compass -sdk macosx
+      - name: Build Swift project (macOS)
+        run: xcodebuild build -scheme Compass -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+
+  swift-tests:
+    runs-on: macos-latest
+    needs: swift-build
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Run Swift tests (macOS)
+        run: xcodebuild test -scheme Compass -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
