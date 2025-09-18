@@ -40,7 +40,7 @@ struct PairedPleadingsList: View {
                     Section(header: Text("Block \(block.id)")) {
                         HStack(alignment: .top, spacing: 16) {
 
-                            // Left: Statements (drop target)
+                            // Left: Statements (drop target + drag source)
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Statements (\(block.statements.count))")
                                     .font(.headline)
@@ -48,19 +48,21 @@ struct PairedPleadingsList: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(s.text)
                                             .frame(maxWidth: .infinity, alignment: .leading)
+                                            // Accept response → statement
                                             .onDrop(of: [UTType.plainText.identifier],
                                                     isTargeted: nil) { providers in
                                                 if let provider = providers.first {
                                                     _ = provider.loadObject(ofClass: String.self) { (str, _) in
                                                         if let str,
                                                            let droppedId = Int(str) {
+                                                            print("🟢 Drop Response→Statement: responseId=\(droppedId), statementId=\(s.id)")
                                                             let ok = DB.shared.insertLink(
                                                                 statementId: s.id,
                                                                 responseId: droppedId
                                                             )
                                                             if ok {
                                                                 DispatchQueue.main.async {
-                                                                    load() // refresh UI
+                                                                    load()
                                                                 }
                                                             }
                                                         }
@@ -68,6 +70,10 @@ struct PairedPleadingsList: View {
                                                     return true
                                                 }
                                                 return false
+                                            }
+                                            // Enable statement → response
+                                            .onDrag {
+                                                NSItemProvider(object: String(s.id) as NSString)
                                             }
 
                                         if !s.linkedResponseIds.isEmpty {
@@ -95,7 +101,7 @@ struct PairedPleadingsList: View {
                                                             )
                                                             if ok {
                                                                 DispatchQueue.main.async {
-                                                                    load() // refresh UI
+                                                                    load()
                                                                 }
                                                             }
                                                         } label: {
@@ -112,7 +118,7 @@ struct PairedPleadingsList: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
 
-                            // Right: Answers (drag source)
+                            // Right: Answers (drag source + drop target)
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Answers (\(block.answers.count))")
                                     .font(.headline)
@@ -120,8 +126,32 @@ struct PairedPleadingsList: View {
                                     Text(a.text)
                                         .foregroundStyle(.secondary)
                                         .frame(maxWidth: .infinity, alignment: .leading)
+                                        // Response → statement (existing)
                                         .onDrag {
                                             NSItemProvider(object: String(a.id) as NSString)
+                                        }
+                                        // New: Statement → response
+                                        .onDrop(of: [UTType.plainText.identifier],
+                                                isTargeted: nil) { providers in
+                                            if let provider = providers.first {
+                                                _ = provider.loadObject(ofClass: String.self) { (str, _) in
+                                                    if let str,
+                                                       let droppedId = Int(str) {
+                                                        print("🟣 Drop Statement→Response: statementId=\(droppedId), responseId=\(a.id)")
+                                                        let ok = DB.shared.insertLink(
+                                                            statementId: droppedId,
+                                                            responseId: a.id
+                                                        )
+                                                        if ok {
+                                                            DispatchQueue.main.async {
+                                                                load()
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                return true
+                                            }
+                                            return false
                                         }
                                 }
                             }
