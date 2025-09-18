@@ -1,5 +1,7 @@
+//
 //  ContentView.swift
 //  Compass
+//
 
 import SwiftUI
 import AppKit
@@ -10,7 +12,7 @@ struct ContentView: View {
     @State private var htmlURL: URL?
     // Selected source the user picked (DOCX / PDF)
     @State private var sourceURL: URL?
-    // Last processed document id (used by Sentence View)
+    // Last processed document id (used by Sentence View / Issues)
     @State private var lastDocID: String?
 
     // UI state
@@ -19,7 +21,8 @@ struct ContentView: View {
     @State private var showDBViewer = false
     @State private var showSentenceView = false
     @State private var showSBSView = false
-    @State private var showPairedView = false   // <-- new
+    @State private var showPairedView = false
+    @State private var showIssuesView = false   // <-- new
 
     var body: some View {
         VStack(spacing: 0) {
@@ -50,7 +53,10 @@ struct ContentView: View {
                 Button("Side-by-Side…") { showSBSView = true }
                     .disabled(lastDocID == nil)
 
-                Button("Paired Pleadings…") { showPairedView = true }   // <-- new button
+                Button("Paired Pleadings…") { showPairedView = true }
+                    .disabled(lastDocID == nil)
+
+                Button("Issues…") { showIssuesView = true }   // <-- new button
                     .disabled(lastDocID == nil)
 
                 Button("Choose…") { chooseSource() }
@@ -132,6 +138,16 @@ struct ContentView: View {
             if let id = lastDocID {
                 NavigationView { PairedPleadingsList(docID: id) }
                     .frame(minWidth: 1000, minHeight: 700)
+            } else {
+                Text("No document loaded yet.")
+                    .frame(minWidth: 400, minHeight: 200)
+            }
+        }
+        // Issues View sheet
+        .sheet(isPresented: $showIssuesView) {
+            if let _ = lastDocID {
+                NavigationView { IssuesScreen() }   // currently stubbed
+                    .frame(minWidth: 1200, minHeight: 700)
             } else {
                 Text("No document loaded yet.")
                     .frame(minWidth: 400, minHeight: 200)
