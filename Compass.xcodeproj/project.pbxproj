@@ -59,6 +59,14 @@
 			);
 			target = 50536E542E73B456009E561E /* Compass */;
 		};
+		507EB53C2E7D697000C4A0DC /* Exceptions for "_Archive" folder in "Compass" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ContentView_Legacy.swift,
+				IssuesScreen_Legacy.swift,
+			);
+			target = 50536E542E73B456009E561E /* Compass */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -81,6 +89,14 @@
 		50536EE62E7556E6009E561E /* db */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = db;
+			sourceTree = "<group>";
+		};
+		507EB5382E7D689500C4A0DC /* _Archive */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				507EB53C2E7D697000C4A0DC /* Exceptions for "_Archive" folder in "Compass" target */,
+			);
+			path = _Archive;
 			sourceTree = "<group>";
 		};
 		508A01932E77F57600DA05EF /* utils */ = {
@@ -118,6 +134,7 @@
 		50536E4C2E73B456009E561E = {
 			isa = PBXGroup;
 			children = (
+				507EB5382E7D689500C4A0DC /* _Archive */,
 				508A01932E77F57600DA05EF /* utils */,
 				50536EE62E7556E6009E561E /* db */,
 				50536E572E73B456009E561E /* Compass */,
@@ -146,6 +163,7 @@
 			fileSystemSynchronizedGroups = (
 				50536E572E73B456009E561E /* Compass */,
 				50536EE62E7556E6009E561E /* db */,
+				507EB5382E7D689500C4A0DC /* _Archive */,
 				508A01932E77F57600DA05EF /* utils */,
 			);
 			name = Compass;

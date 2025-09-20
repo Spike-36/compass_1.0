@@ -2,8 +2,6 @@
 //  CapturePhase1.swift
 //  Compass
 //
-//  Phase-1: capture SAME-LINE Statement/Answer headers and write NDJSON + refresh DB.
-//
 
 import Foundation
 import SQLite3
@@ -20,6 +18,9 @@ enum CapturePhase1 {
 
     private enum BlockType: String { case statement, answer }
 
+    // NEW: toggle refresh behaviour
+    private static let DB_REFRESH_ENABLED = false
+
     /// Entry point. Safe to call every run; no-op if flag is OFF.
     static func runSameLineCapture(docId: String, paragraphs: [String], exportsDir: URL? = nil) {
         guard FeatureFlags.CAPTURE_ENABLED else { return }
@@ -33,7 +34,7 @@ enum CapturePhase1 {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             if cleaned.isEmpty { continue }
 
-            // 🔑 if a header appears later in the line, split into head + tail
+            // Split off second header if inline
             if let secondHeader = findNextHeaderStart(in: cleaned),
                secondHeader.lowerBound != cleaned.startIndex {
                 let head = String(cleaned[..<secondHeader.lowerBound])
@@ -44,20 +45,17 @@ enum CapturePhase1 {
                 cleaned = head
             }
 
-            print("LINE:", cleaned)
-
             if let hit = matchSameLineHeader(cleaned) {
                 let sents = SentenceSplitter.split(hit.body)
 
                 if sents.isEmpty {
-                    // 🔑 NEW: still emit a placeholder record to create the block
                     emptyBlocks += 1
                     records.append(CaptureRecord(
                         doc_id: docId,
                         block_type: hit.type.rawValue,
                         block_number: hit.number,
                         sentence_index: 1,
-                        text: ""   // explicit placeholder
+                        text: ""
                     ))
                 } else {
                     for (idx, s) in sents.enumerated() {
@@ -79,7 +77,6 @@ enum CapturePhase1 {
             }
         }
 
-        // 🚨 Force export path to project exports dir unless caller overrides
         let forcedExportsDir = URL(fileURLWithPath: "/Users/petermilligan/Dev/Compass/exports")
         let outDir = exportsDir ?? forcedExportsDir
         let outURL = outDir.appendingPathComponent("\(docId).capture.ndjson")
@@ -90,8 +87,10 @@ enum CapturePhase1 {
             NSLog("capture: failed to write NDJSON: \(error.localizedDescription)")
         }
 
-        // 🔥 NEW: also refresh the DB
-        writeToDatabase(records: records, docId: docId)
+        // 🚫 Disabled by default to preserve DB during dev
+        if DB_REFRESH_ENABLED {
+            writeToDatabase(records: records, docId: docId)
+        }
 
         print("capture: statements=\(statements) answers=\(answers) sentences=\(sentences) empty_blocks=\(emptyBlocks)")
     }
@@ -99,7 +98,6 @@ enum CapturePhase1 {
     // MARK: - Header detection
 
     private static func matchSameLineHeader(_ line: String) -> (type: BlockType, number: Int, body: String)? {
-        // Loosened regex: allow body to be empty (so "Stat 2." is valid)
         let patterns: [(BlockType, NSRegularExpression)] = {
             let raw: [(BlockType, String)] = [
                 (.statement, #"^\s*(?:Stat\.?|Statement)\s*(\d+)\s*[\.:]?\s*(.*)?$"#),
@@ -127,7 +125,6 @@ enum CapturePhase1 {
         return nil
     }
 
-    /// Detect embedded "Stat 2." or "Ans 3." even after punctuation
     private static func findNextHeaderStart(in s: String) -> Range<String.Index>? {
         let pat = #"(?i)(Stat\.?|Statement|Ans\.?|Answer)\s+\d+\s*[.:]"#
         guard let rx = try? NSRegularExpression(pattern: pat) else { return nil }
@@ -173,7 +170,6 @@ enum CapturePhase1 {
         }
         defer { sqlite3_close(db) }
 
-        // ensure schema
         let schemaSQL = """
         CREATE TABLE IF NOT EXISTS sentences (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,7 +185,6 @@ enum CapturePhase1 {
             return
         }
 
-        // delete old rows
         var delStmt: OpaquePointer?
         if sqlite3_prepare_v2(db, "DELETE FROM sentences WHERE doc_id = ?", -1, &delStmt, nil) == SQLITE_OK {
             sqlite3_bind_text(delStmt, 1, (docId as NSString).utf8String, -1, nil)
@@ -197,7 +192,6 @@ enum CapturePhase1 {
         }
         sqlite3_finalize(delStmt)
 
-        // insert new rows
         let insertSQL = """
         INSERT INTO sentences (doc_id, block_type, block_number, sentence_index, text)
         VALUES (?, ?, ?, ?, ?)
