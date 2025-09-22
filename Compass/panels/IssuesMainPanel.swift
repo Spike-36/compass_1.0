@@ -1,22 +1,30 @@
 import SwiftUI
 
 struct IssuesMainPanel: View {
-    // Stub property for now
-    var issue: String? = nil
+    @State private var mode: SentenceListPanel.Mode = .linked   // default to linked
+    var selectedIssue: DBIssue? = nil  // plain optional, no binding yet
 
     var body: some View {
-        VStack {
-            Text("📝 IssuesMainPanel (stub)")
-                .font(.headline)
-                .padding()
-
-            if let issue = issue {
-                Text("Detail for: \(issue)")
-            } else {
-                Text("Select an issue from the nav panel")
-                    .foregroundColor(.secondary)
+        VStack(spacing: 0) {
+            Picker("Mode", selection: $mode) {
+                Text("All Sentences").tag(SentenceListPanel.Mode.all)
+                Text("Linked Only").tag(SentenceListPanel.Mode.linked)
             }
+            .pickerStyle(.segmented)
+            .padding()
+
+            Divider()
+
+            SentenceListPanel(mode: mode, selectedIssue: selectedIssue)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .navigationTitle("Issues")
+    }
+}
+
+#Preview {
+    NavigationView {
+        IssuesMainPanel()
     }
 }
 

@@ -8,7 +8,8 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         NavigationView {
-            CompassScreen()
+            // 👇 Choose the starting mode here
+            CompassScreen(initialMode: .pleadingsPDF)
                 .frame(minWidth: 1200, minHeight: 700)
         }
     }

@@ -23,7 +23,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		507EB5692E80090700C4A0DC /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		507EB56B2E80090700C4A0DC /* DocxHarness */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DocxHarness; sourceTree = BUILT_PRODUCTS_DIR; };
 		508A01402E77B09000DA05EF /* Compass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Compass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		508A01412E77B09000DA05EF /* CompassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		508A01422E77B09000DA05EF /* CompassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompassUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +83,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		501873C52E80D195001D5A83 /* Components */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Components;
+			sourceTree = "<group>";
+		};
 		50536E572E73B456009E561E /* Compass */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -128,12 +146,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		507EB5682E80090700C4A0DC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		50536E4C2E73B456009E561E = {
 			isa = PBXGroup;
 			children = (
+				501873C52E80D195001D5A83 /* Components */,
 				507EB5382E7D689500C4A0DC /* _Archive */,
 				508A01932E77F57600DA05EF /* utils */,
 				50536EE62E7556E6009E561E /* db */,
@@ -142,6 +168,7 @@
 				508A01402E77B09000DA05EF /* Compass.app */,
 				508A01412E77B09000DA05EF /* CompassTests.xctest */,
 				508A01422E77B09000DA05EF /* CompassUITests.xctest */,
+				507EB56B2E80090700C4A0DC /* DocxHarness */,
 			);
 			sourceTree = "<group>";
 		};
@@ -161,6 +188,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				501873C52E80D195001D5A83 /* Components */,
 				50536E572E73B456009E561E /* Compass */,
 				50536EE62E7556E6009E561E /* db */,
 				507EB5382E7D689500C4A0DC /* _Archive */,
@@ -216,6 +244,25 @@
 			productReference = 508A01422E77B09000DA05EF /* CompassUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		507EB56A2E80090700C4A0DC /* DocxHarness */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 507EB56F2E80090700C4A0DC /* Build configuration list for PBXNativeTarget "DocxHarness" */;
+			buildPhases = (
+				507EB5672E80090700C4A0DC /* Sources */,
+				507EB5682E80090700C4A0DC /* Frameworks */,
+				507EB5692E80090700C4A0DC /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DocxHarness;
+			packageProductDependencies = (
+			);
+			productName = DocxHarness;
+			productReference = 507EB56B2E80090700C4A0DC /* DocxHarness */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -238,6 +285,9 @@
 						CreatedOnToolsVersion = 16.3;
 						TestTargetID = 50536E542E73B456009E561E;
 					};
+					507EB56A2E80090700C4A0DC = {
+						CreatedOnToolsVersion = 16.3;
+					};
 				};
 			};
 			buildConfigurationList = 50536E502E73B456009E561E /* Build configuration list for PBXProject "Compass" */;
@@ -257,6 +307,7 @@
 				50536E542E73B456009E561E /* Compass */,
 				50536E622E73B457009E561E /* CompassTests */,
 				50536E6C2E73B457009E561E /* CompassUITests */,
+				507EB56A2E80090700C4A0DC /* DocxHarness */,
 			);
 		};
 /* End PBXProject section */
@@ -301,6 +352,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		50536E692E73B457009E561E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		507EB5672E80090700C4A0DC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -568,6 +626,28 @@
 			};
 			name = Release;
 		};
+		507EB5702E80090700C4A0DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HARLRJ9283;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		507EB5712E80090700C4A0DC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HARLRJ9283;
+				ENABLE_HARDENED_RUNTIME = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -603,6 +683,15 @@
 			buildConfigurations = (
 				50536E7E2E73B457009E561E /* Debug */,
 				50536E7F2E73B457009E561E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		507EB56F2E80090700C4A0DC /* Build configuration list for PBXNativeTarget "DocxHarness" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				507EB5702E80090700C4A0DC /* Debug */,
+				507EB5712E80090700C4A0DC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

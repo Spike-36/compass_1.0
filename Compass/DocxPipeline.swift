@@ -2,10 +2,6 @@
 //  DocxPipeline.swift
 //  Compass
 //
-//  Reads a user-selected DOCX → plain text via `textutil` → HTML with sentence spans.
-//  Writes outputs to ~/Dev/Compass/exports (real home dir, not sandbox container).
-//  Calls CapturePhase1.runSameLineCapture(...) after paragraphization (Phase 1).
-//
 
 import Foundation
 
@@ -20,10 +16,18 @@ enum DocxPipeline {
     static func run(input: URL) throws -> Result {
         let fm = FileManager.default
 
-        guard fm.fileExists(atPath: input.path) else {
-            throw NSError(domain: "Compass", code: 404,
-                          userInfo: [NSLocalizedDescriptionKey:
-                                        "DOCX not found at \(input.path)"])
+        // First try the input directly, then fallback into Compass/Compass/
+        var actualInput = input
+        if !fm.fileExists(atPath: actualInput.path) {
+            let fallback = fm.homeDirectoryForCurrentUser
+                .appendingPathComponent("Dev/Compass/Compass/\(input.lastPathComponent)")
+            if fm.fileExists(atPath: fallback.path) {
+                actualInput = fallback
+            } else {
+                throw NSError(domain: "Compass", code: 404,
+                              userInfo: [NSLocalizedDescriptionKey:
+                                            "DOCX not found at \(input.path) or \(fallback.path)"])
+            }
         }
 
         // Temporary workspace (for conversion + staging)
@@ -31,17 +35,21 @@ enum DocxPipeline {
         let tmpExports = tmpRoot.appendingPathComponent("exports")
         try fm.createDirectory(at: tmpExports, withIntermediateDirectories: true)
 
-        // ✅ Stable exports location in real home directory
-        let sharedExports = fm.homeDirectoryForCurrentUser
-            .appendingPathComponent("Dev/Compass/exports", isDirectory: true)
+        // ✅ Stable exports location in sandbox-safe Documents/exports
+        let sharedExports = try fm.url(
+            for: .documentDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        ).appendingPathComponent("exports", isDirectory: true)
         try fm.createDirectory(at: sharedExports, withIntermediateDirectories: true)
 
         // 👇 Visibility: confirm which dir we are using
         print("DocxPipeline using exports dir →", sharedExports.path)
 
         // DOCX → TXT (into temp)
-        let txtURL = tmpRoot.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".txt")
-        try convertDocxToTxt(input: input, output: txtURL)
+        let txtURL = tmpRoot.appendingPathComponent(actualInput.deletingPathExtension().lastPathComponent + ".txt")
+        try convertDocxToTxt(input: actualInput, output: txtURL)
 
         // Read plain text
         let raw = try String(contentsOf: txtURL, encoding: .utf8)
@@ -49,7 +57,7 @@ enum DocxPipeline {
 
         // Phase-1 capture (same-line only). Capture file is written to sharedExports.
         CapturePhase1.runSameLineCapture(
-            docId: input.deletingPathExtension().lastPathComponent,
+            docId: actualInput.deletingPathExtension().lastPathComponent,
             paragraphs: paragraphs,
             exportsDir: sharedExports
         )
@@ -72,21 +80,21 @@ enum DocxPipeline {
         body += "</article>\n"
 
         // Wrap HTML
-        let html = wrapAsPage(bodyHTML: body, title: "Compass — \(input.lastPathComponent)")
+        let html = wrapAsPage(bodyHTML: body, title: "Compass — \(actualInput.lastPathComponent)")
 
         // Write to temp first
-        let tmpHTML = tmpExports.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".html")
+        let tmpHTML = tmpExports.appendingPathComponent(actualInput.deletingPathExtension().lastPathComponent + ".html")
         try html.write(to: tmpHTML, atomically: true, encoding: .utf8)
 
         // Then copy/replace into the shared exports folder
-        let sharedHTML = sharedExports.appendingPathComponent(input.deletingPathExtension().lastPathComponent + ".html")
+        let sharedHTML = sharedExports.appendingPathComponent(actualInput.deletingPathExtension().lastPathComponent + ".html")
         if fm.fileExists(atPath: sharedHTML.path) {
             try fm.removeItem(at: sharedHTML)
         }
         try fm.copyItem(at: tmpHTML, to: sharedHTML)
 
         return .init(htmlURL: sharedHTML,
-                     docID: input.deletingPathExtension().lastPathComponent,
+                     docID: actualInput.deletingPathExtension().lastPathComponent,
                      version: 1)
     }
 
@@ -110,15 +118,9 @@ enum DocxPipeline {
 
     // MARK: - Text shaping
 
-    /// Split text into paragraphs. Detects Stat/Ans headers even when inline.
     private static func splitIntoParagraphs(_ s: String) -> [String] {
-        // Normalize line endings
         let norm = s.replacingOccurrences(of: "\r\n", with: "\n")
-
-        // Collapse multiple blank lines
         let collapsed = norm.replacingOccurrences(of: "\n{2,}", with: "\n\n", options: .regularExpression)
-
-        // Regex: start a new para before "Stat N." or "Ans. N."
         let pattern = #"(?=\b(?:Stat\s+\d+\.|Ans\.\s*\d+\.))"#
         let regex = try! NSRegularExpression(pattern: pattern)
 
@@ -138,7 +140,6 @@ enum DocxPipeline {
         let tail = String(collapsed[start...]).trimmingCharacters(in: .whitespacesAndNewlines)
         if !tail.isEmpty { parts.append(tail) }
 
-        // Also split on double newlines inside chunks
         return parts.flatMap { chunk in
             chunk
                 .components(separatedBy: "\n\n")
@@ -148,8 +149,7 @@ enum DocxPipeline {
     }
 
     private static func splitIntoSentences(_ text: String) -> [String] {
-        let norm = text.replacingOccurrences(of: "\\s+", with: " ",
-                                             options: .regularExpression)
+        let norm = text.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
         let pattern = #"(?<!\d)([.!?])\s+(?=[A-Z"'])"#
         let regex = try! NSRegularExpression(pattern: pattern)
         var result: [String] = []

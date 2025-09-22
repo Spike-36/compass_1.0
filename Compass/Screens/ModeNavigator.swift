@@ -13,9 +13,20 @@ struct ModeNavigator {
     static func navPanel(for mode: CompassMode) -> some View {
         switch mode {
         case .issues:
-            IssuesNavPanel()       // ✅ file exists
+            IssuesNavPanel()
         case .pleadings:
-            PleadingsNavPanel()    // 🚨 must create this file
+            PleadingsNavPanel()
+        case .pleadingsPDF:
+            PleadingsPDFNavPanel(
+                docID: "brown.record"   // default doc for now
+            ) { type, number in
+                // placeholder action until hooked to PDF scrolling
+                print("Selected \(type) \(number)")
+            }
+        case .splitSentences:
+            SplitSentencesNavPanel()
+        case .sideBySide:
+            SideBySideNavPanel()
         }
     }
 
@@ -24,9 +35,15 @@ struct ModeNavigator {
     static func mainPanel(for mode: CompassMode) -> some View {
         switch mode {
         case .issues:
-            IssuesMainPanel()      // 🚨 must create this file
+            IssuesMainPanel()
         case .pleadings:
-            PleadingsMainPanel()   // ✅ file exists
+            PleadingsMainPanel()
+        case .pleadingsPDF:
+            PleadingsPDFMainPanel()
+        case .splitSentences:
+            SplitSentencesMainPanel()
+        case .sideBySide:
+            SideBySideMainPanel()
         }
     }
 }

@@ -11,6 +11,10 @@ import Foundation
 enum CompassMode: String, CaseIterable, Identifiable {
     case issues = "Issues"
     case pleadings = "Pleadings"
+    case pleadingsPDF = "Pleadings PDF"   // 👈 new mode
+    case splitSentences = "Split Sentences"
+    case sideBySide = "Side-by-Side"
+
     // Add more cases as the app grows:
     // case documents = "Documents"
     // case evidence = "Evidence"
@@ -26,10 +30,3 @@ enum CompassMode: String, CaseIterable, Identifiable {
     /// Display label for UI
     var label: String { rawValue }
 }
-//
-//  CompassMode.swift
-//  Compass
-//
-//  Created by Peter Milligan on 20/09/2025.
-//
-
